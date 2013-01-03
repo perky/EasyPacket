@@ -16,11 +16,6 @@ import net.minecraft.network.packet.Packet250CustomPayload;
 
 import cpw.mods.fml.common.network.Player;
 
-import ljdp.easypacket.serializer.LongSerializer;
-import ljdp.easypacket.serializer.Serializer;
-import ljdp.easypacket.serializer.SerializerHandler;
-import ljdp.easypacket.serializer.StringSerializer;
-
 public class EasyPacketHandler {
 	
 	private static int nextPacketID = 0;
@@ -95,7 +90,7 @@ public class EasyPacketHandler {
 		EasyPacket easyPacket = createPacket();
 		if(easyPacket != null) {
 			read(easyPacket, data);
-			easyPacket.onReceive();
+			easyPacket.onReceive(player);
 		}
 	}
 	

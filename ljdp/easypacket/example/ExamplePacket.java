@@ -1,5 +1,6 @@
 package ljdp.easypacket.example;
 
+import cpw.mods.fml.common.network.Player;
 import ljdp.easypacket.EasyPacket;
 import ljdp.easypacket.EasyPacketData;
 
@@ -33,6 +34,6 @@ public class ExamplePacket extends EasyPacket {
 	}
 
 	@Override
-	public void onReceive() {
+	public void onReceive(Player player) {
 	}
 }
