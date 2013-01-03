@@ -10,6 +10,10 @@ public class EasyPacketDispatcher implements IPacketHandler {
 	
 	private String channel;
 	
+	/**
+	 * The EasyPacketDispatcher is links your packet handlers with minecraft's packetDispatchers.
+	 * @param String channel
+	 */
 	public EasyPacketDispatcher(String channel) {
 		this.channel = channel;
 	}
@@ -57,7 +61,11 @@ public class EasyPacketDispatcher implements IPacketHandler {
 		Packet250CustomPayload packet = createCustomPacket(data, isChunkData);
 		PacketDispatcher.sendPacketToAllAround(x, y, z, range, dimensionID, packet);
 	}
-
+	
+	/**
+	 * You'll need to create your own class that implements IPacketHandler and call this method
+	 * in onPacketData. 
+	 */
 	@Override
 	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player) {
 		EasyPacketHandler.onPacketReceived(manager, packet, player);

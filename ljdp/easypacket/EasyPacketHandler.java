@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
+import ljdp.easypacket.serializer.Serializer;
+import ljdp.easypacket.serializer.SerializerHandler;
+
 import net.minecraft.network.INetworkManager;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
@@ -25,6 +28,12 @@ public class EasyPacketHandler {
 		Field field;
 	}
 	
+	/**
+	 * Registers an EasyPacket class and returns an EasyPacketHandler
+	 * @param clazz the EasyPacket class to register
+	 * @param dispatcher The dispatcher to bind the handler to.
+	 * @return
+	 */
 	public static EasyPacketHandler registerEasyPacket(Class<? extends EasyPacket> clazz, EasyPacketDispatcher dispatcher) {
 		int packetID = nextPacketID++;
 		EasyPacketHandler packetHandler = new EasyPacketHandler(packetID, dispatcher);
@@ -74,6 +83,10 @@ public class EasyPacketHandler {
 		this.dispatcher = dispatcher;
 	}
 	
+	/**
+	 * Creates an empty packet.
+	 * @return
+	 */
 	public EasyPacket createPacket() {
 		EasyPacket easyPacket = null;
 		try {
@@ -94,6 +107,11 @@ public class EasyPacketHandler {
 		}
 	}
 	
+	/**
+	 * Writes the all fields annotated with @EasyPacketData to a byte array.
+	 * @param easyPacket
+	 * @return byte[] data
+	 */
 	public byte[] write(EasyPacket easyPacket) {
 		easyPacket.id = packetID;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -116,6 +134,11 @@ public class EasyPacketHandler {
 		return bos.toByteArray();
 	}
 	
+	/**
+	 * Reads a byte array and inserts the values in the packet's fields annotated with @EasyPacketData
+	 * @param easyPacket
+	 * @param data
+	 */
 	public void read(EasyPacket easyPacket, byte[] data) {
 		easyPacket.id = packetID;
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);

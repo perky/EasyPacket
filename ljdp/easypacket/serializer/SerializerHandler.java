@@ -19,12 +19,22 @@ public class SerializerHandler {
 		serializers.put(ItemStack.class, new ItemStackSerializer());
 	}
 	
-	public void registerSerializer(Class<?> clazz, Serializer serializer) {
-		serializers.put(clazz, serializer);
+	/**
+	 * Registers a serializer to serializer a type.
+	 * @param type I.E. String.class, Long.class
+	 * @param serializer The serializer instance.
+	 */
+	public void registerSerializer(Class<?> type, Serializer serializer) {
+		serializers.put(type, serializer);
 	}
 	
-	public Serializer getSerializer(Class<?> clazz) {
-		return serializers.get(clazz);
+	/**
+	 * Gets a serializer by type.
+	 * @param type
+	 * @return
+	 */
+	public Serializer getSerializer(Class<?> type) {
+		return serializers.get(type);
 	}
 	
 }
