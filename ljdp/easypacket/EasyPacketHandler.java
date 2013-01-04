@@ -75,12 +75,31 @@ public class EasyPacketHandler {
 	
 	private int packetID;
 	private List<DataField> dataFields = new ArrayList();
+	private List<IEasyPacketCallback> callbacks = new ArrayList();
 	private EasyPacketDispatcher dispatcher;
 	private Class<? extends EasyPacket> packetClass;
 	
 	private EasyPacketHandler(int packetID, EasyPacketDispatcher dispatcher) {
 		this.packetID = packetID;
 		this.dispatcher = dispatcher;
+	}
+	
+	/**
+	 * Registers a class that implements IEasyPacketCallback.
+	 * When a packet of the handler's type is received
+	 * the callback methods will be invoked.
+	 * @param callback
+	 */
+	public void registerCallback(IEasyPacketCallback callback) {
+		callbacks.add(callback);
+	}
+	
+	/**
+	 * Unregisters an IEasyPacketCallback class.
+	 * @param callback
+	 */
+	public void unregisterCallback(IEasyPacketCallback callback) {
+		callbacks.remove(callback);
 	}
 	
 	/**
@@ -104,6 +123,8 @@ public class EasyPacketHandler {
 		if(easyPacket != null) {
 			read(easyPacket, data);
 			easyPacket.onReceive(player);
+			for(IEasyPacketCallback callback : callbacks)
+				callback.onEasyPacketReceived(easyPacket, this, player);
 		}
 	}
 	
