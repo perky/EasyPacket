@@ -36,41 +36,36 @@ public class EasyPacketHandler {
 	 */
 	public static EasyPacketHandler registerEasyPacket(Class<? extends EasyPacket> clazz, EasyPacketDispatcher dispatcher) {
 		int packetID = nextPacketID++;
-		EasyPacketHandler packetHandler = new EasyPacketHandler(packetID, dispatcher);
+		EasyPacketHandler packetHandler = new EasyPacketHandler(packetID, dispatcher, clazz);
 		handlers.put(packetID, packetHandler);
-		Field[] fields = clazz.getFields();
+		collectFields(packetHandler, clazz);
+		return packetHandler;
+	}
+	
+	private static void collectFields(EasyPacketHandler handler, Class<?> clazz) {
+		Class<?> superClazz = clazz.getSuperclass();
+		if(superClazz != null)
+			collectFields(handler, superClazz);
+		Field[] fields = clazz.getDeclaredFields();
 		for(Field field : fields) {
 			Annotation dataAnnotation = field.getAnnotation(EasyPacketData.class);
 			if(dataAnnotation != null) {
-				registerDataField(packetHandler, field, (EasyPacketData)dataAnnotation);
+				registerDataField(handler, field, (EasyPacketData)dataAnnotation);
 			}
 		}
-		return packetHandler;
 	}
 
 	private static void registerDataField(EasyPacketHandler handler, Field field, EasyPacketData dataAnnotation) {
+		field.setAccessible(true);
 		DataField dataField = new DataField();
 		dataField.type = field.getType();
 		dataField.field = field;
 		handler.dataFields.add(dataField);
 	}
 	
-	protected static void onPacketReceived(INetworkManager manager, Packet250CustomPayload packet, Player player) {
-		int packetID = getPacketIDFromData(packet.data);
+	protected static void onDataReceived(INetworkManager manager, DataInputStream data, Player player, int packetID) throws IOException {
 		EasyPacketHandler packetHandler = handlers.get(packetID);
-		packetHandler.onDataReceived(packet.data, player);
-	}
-	
-	private static int getPacketIDFromData(byte[] data) {
-		ByteArrayInputStream in = new ByteArrayInputStream(data);
-		DataInputStream din = new DataInputStream(in);
-		int readPacketID = -1;
-		try {
-			readPacketID = din.readInt();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return readPacketID;
+		packetHandler.onDataReceived(data, player);
 	}
 	
 	private int packetID;
@@ -79,9 +74,10 @@ public class EasyPacketHandler {
 	private EasyPacketDispatcher dispatcher;
 	private Class<? extends EasyPacket> packetClass;
 	
-	private EasyPacketHandler(int packetID, EasyPacketDispatcher dispatcher) {
+	private EasyPacketHandler(int packetID, EasyPacketDispatcher dispatcher, Class<? extends EasyPacket> clazz) {
 		this.packetID = packetID;
 		this.dispatcher = dispatcher;
+		this.packetClass = clazz;
 	}
 	
 	/**
@@ -118,7 +114,7 @@ public class EasyPacketHandler {
 		return easyPacket;
 	}
 	
-	private void onDataReceived(byte[] data, Player player) {
+	private void onDataReceived(DataInputStream data, Player player) throws IOException {
 		EasyPacket easyPacket = createPacket();
 		if(easyPacket != null) {
 			read(easyPacket, data);
@@ -134,15 +130,18 @@ public class EasyPacketHandler {
 	 * @return byte[] data
 	 */
 	public byte[] write(EasyPacket easyPacket) {
-		easyPacket.id = packetID;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(bos);
-		
+		DataOutputStream output = new DataOutputStream(bos);
+		try {
+			output.writeInt(packetID);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		for(DataField dataField : dataFields) {
 			Serializer serializer = SerializerHandler.instance.getSerializer(dataField.type);
 			if(serializer == null) continue;
 			try {
-				serializer.write(easyPacket, dataField.field, dos);
+				serializer.write(easyPacket, dataField.field, output);
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
@@ -160,15 +159,12 @@ public class EasyPacketHandler {
 	 * @param easyPacket
 	 * @param data
 	 */
-	public void read(EasyPacket easyPacket, byte[] data) {
-		easyPacket.id = packetID;
-		ByteArrayInputStream bis = new ByteArrayInputStream(data);
-		DataInputStream dis = new DataInputStream(bis);
+	public void read(EasyPacket easyPacket, DataInputStream input) {
 		for(DataField dataField : dataFields) {
 			Serializer serializer = SerializerHandler.instance.getSerializer(dataField.type);
 			if(serializer == null) continue;
 			try {
-				serializer.read(easyPacket, dataField.field, dis);
+				serializer.read(easyPacket, dataField.field, input);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {

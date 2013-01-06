@@ -1,5 +1,9 @@
 package ljdp.easypacket;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
@@ -68,7 +72,14 @@ public class EasyPacketDispatcher implements IPacketHandler {
 	 */
 	@Override
 	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player) {
-		EasyPacketHandler.onPacketReceived(manager, packet, player);
+		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(packet.data);
+		DataInputStream inputStream = new DataInputStream(byteArrayInputStream);
+		try {
+			int packetID = inputStream.readInt();
+			EasyPacketHandler.onDataReceived(manager, inputStream, player, packetID);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	

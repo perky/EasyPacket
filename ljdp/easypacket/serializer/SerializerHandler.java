@@ -13,9 +13,10 @@ public class SerializerHandler {
 		serializers.put(String.class, new StringSerializer());
 		serializers.put(Long.class, new LongSerializer());
 		serializers.put(Short.class, new ShortSerializer());
-		serializers.put(Integer.class, new IntegerSerializer());
+		serializers.put(int.class, new IntegerSerializer());
 		serializers.put(boolean.class, new BooleanSerializer());
 		serializers.put(byte[].class, new ByteArraySerializer());
+		serializers.put(float.class, new FloatSerializer());
 		serializers.put(ItemStack.class, new ItemStackSerializer());
 	}
 	
