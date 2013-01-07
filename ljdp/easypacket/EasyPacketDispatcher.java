@@ -34,6 +34,7 @@ public class EasyPacketDispatcher implements IPacketHandler {
 		Packet250CustomPayload customPacket = new Packet250CustomPayload();
 		customPacket.channel = this.channel;
 		customPacket.data = data;
+		customPacket.length = data.length;
 		customPacket.isChunkDataPacket = isChunkData;
 		return customPacket;
 	}
@@ -75,7 +76,7 @@ public class EasyPacketDispatcher implements IPacketHandler {
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(packet.data);
 		DataInputStream inputStream = new DataInputStream(byteArrayInputStream);
 		try {
-			int packetID = inputStream.readInt();
+			int packetID = inputStream.readByte();
 			EasyPacketHandler.onDataReceived(manager, inputStream, player, packetID);
 		} catch (IOException e) {
 			e.printStackTrace();

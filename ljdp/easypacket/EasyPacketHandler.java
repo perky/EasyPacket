@@ -29,7 +29,8 @@ public class EasyPacketHandler {
 	}
 	
 	/**
-	 * Registers an EasyPacket class and returns an EasyPacketHandler
+	 * Registers an EasyPacket class and returns an EasyPacketHandler.
+	 * Note: You can't register more than 256 EasyPackets.
 	 * @param clazz the EasyPacket class to register
 	 * @param dispatcher The dispatcher to bind the handler to.
 	 * @return
@@ -133,7 +134,7 @@ public class EasyPacketHandler {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream output = new DataOutputStream(bos);
 		try {
-			output.writeInt(packetID);
+			output.writeByte(packetID);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
